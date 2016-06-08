@@ -72,8 +72,7 @@ int main()
 	FILE* f;
 	uint32_t sig;
 
-
-	f = fopen("solfa.sec5","rb");
+	f = fopen("unpack.sec5","rb"); //made it so you jsut have to rename the .sec5 file to "unpack.sec5".
 	_mkdir("sec5");
 	if(f)
 	{

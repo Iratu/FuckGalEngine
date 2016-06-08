@@ -1,4 +1,4 @@
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <memory.h>
 #include "dirent.h"
 #include <string>
@@ -21,7 +21,7 @@ typedef unsigned char uchar;
 const ulong version = 2;
 const ulong version_info = version + 109000;
 
-//²»µİ¹éÁĞ³öÎÄ¼ş¼ĞÏÂÎÄ¼ş
+//ä¸é€’å½’åˆ—å‡ºæ–‡ä»¶å¤¹ä¸‹æ–‡ä»¶
 vector<string> list_file(string dirname)
 {
 	DIR *dir = NULL;
@@ -46,7 +46,7 @@ vector<string> list_file(string dirname)
 
 int main(int argc, char* argv[])
 {
-
+	
 	return 0;
 }
 

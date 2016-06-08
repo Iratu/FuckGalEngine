@@ -14,7 +14,7 @@ typedef unordered_map<dword, dword> DwordMap;
 
 wchar_t *AnsiToUnicode(const char *str)
 {
-	static wchar_t result[9999];
+	static wchar_t result[1024];
 	int len = MultiByteToWideChar(932, 0, str, -1, NULL, 0);
 	MultiByteToWideChar(932, 0, str, -1, result, len);
 	result[len] = L'\0';
@@ -61,7 +61,7 @@ dword vm_strlen(byte* b)
 	if (c >= p_fileend) return 0;
 	while (1)
 	{
-		if ((*c == 0x1B && *(c + 1) == 0x03) || (*c == 0x1B && *(c + 1) == 0x02))
+		if ((*c == 0x1B && *(c + 1) == 0x60) || (*c == 0x1B && *(c + 1) == 0x00))
 		{
 			break;
 		}
@@ -82,10 +82,10 @@ byte* text_point(byte* b)
 */
 
 
-byte start_byte[] = { 0x1B, 0x1a, 0x02, 0xff };
-byte end_byte[] = {0x1b, 0x60, 0x00, 0xFF};
-//byte tag[] = {0x1B, 0x03, 0x02, 0xFF};
-byte tag[] = { 0x00, 0x7a, 0x00, 0x04 };
+byte start_byte[] = { 0x1B, 0x12, 0x00, 0x01};
+byte end_byte[] = {0x00, 0x00, 0xff, 0xFF};
+byte tag[] = {0x1B, 0x60, 0x00, 0xFF};
+//byte tag[] = { 0x00, 0x7a, 0x00, 0x04 };
 //To figure out, I have some sort of a clue how to work this but not certain about it yet.
 byte* text_point(byte* b)
 {
@@ -176,7 +176,8 @@ byte* is_select_text(byte* b, dword &length)
 //This function grabs the Box text, find the hex-code that is before a string used inside a box, see example folder, file: box_text_example.png
 byte* is_box_text(byte* b,dword &length)
 {
-	
+
+	byte endtag[] = { 0x1B, 0x12, 0x00, 0x01 };
 	length = 0;
 	if( 
 		b[1] == 0x00 &&
@@ -193,8 +194,10 @@ byte* is_box_text(byte* b,dword &length)
 		//printf(" 0x%1x ", (unsigned)b[6]);
 		//printf("\n");
 		//length = b[4];
+		//end hex
+		//1b 12 00 01 06 00 20 1d
 		length = 0xff; //length isn't mentioned in the hex for this particular file (at least haven't found it yet)
-		return &b[10];
+		return &b[9];
 	}
 
 	return 0;
@@ -210,7 +213,7 @@ int main()
 	dword size;
 	dword read_tell;
 
-	static char print_chars[9999];
+	static char print_chars[1024];
 	byte* char_pointer;
 	dword char_length;
 
@@ -242,10 +245,11 @@ int main()
 		dword line_num = 0;
 		for (read_tell = 0; read_tell < size; read_tell++)
 		{
-
+			/*
 			char_pointer = text_point(&data[read_tell]);
 			if (char_pointer)
 			{
+				
 				char_length = vm_strlen(char_pointer);
 				if (char_length != 0)
 				{
@@ -265,7 +269,7 @@ int main()
 
 				fprintf(txt, "%s\r\n", print_chars);
 			}
-
+			*/
 			char_pointer = is_name_text(&data[read_tell], char_length);
 			if (char_pointer && char_length)
 			{
