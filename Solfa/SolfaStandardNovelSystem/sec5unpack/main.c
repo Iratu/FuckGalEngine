@@ -73,7 +73,7 @@ int main()
 	uint32_t sig;
 
 
-	f = fopen("shukufuku_main.sec5","rb");
+	f = fopen("solfa.sec5","rb");
 	_mkdir("sec5");
 	if(f)
 	{

@@ -1,4 +1,4 @@
-#include <Windows.h>
+ï»¿#include <Windows.h>
 #include <stdio.h>
 #include <string>
 #include <unordered_map>
@@ -14,14 +14,14 @@ typedef unordered_map<dword, dword> DwordMap;
 
 wchar_t *AnsiToUnicode(const char *str)
 {
-	static wchar_t result[1024];
+	static wchar_t result[9999];
 	int len = MultiByteToWideChar(932, 0, str, -1, NULL, 0);
 	MultiByteToWideChar(932, 0, str, -1, result, len);
 	result[len] = L'\0';
 	return result;
 }
 
-//È«²¿Ìæ»»
+//ÃˆÂ«Â²Â¿ÃŒÃ¦Â»Â»
 string replace_all(string dststr, string oldstr, string newstr)
 {
 	string::size_type old_len = oldstr.length();
@@ -82,9 +82,11 @@ byte* text_point(byte* b)
 */
 
 
-byte start_byte[] = {0x1B, 0x12, 0x00, 0x01};
-byte end_byte[] = {0x00, 0x00, 0xFF, 0xFF};
-byte tag[] = {0x1B, 0x03, 0x02, 0xFF};
+byte start_byte[] = { 0x1B, 0x1a, 0x02, 0xff };
+byte end_byte[] = {0x1b, 0x60, 0x00, 0xFF};
+//byte tag[] = {0x1B, 0x03, 0x02, 0xFF};
+byte tag[] = { 0x00, 0x7a, 0x00, 0x04 };
+//To figure out, I have some sort of a clue how to work this but not certain about it yet.
 byte* text_point(byte* b)
 {
 	byte *pos = b;
@@ -110,6 +112,7 @@ byte* text_point(byte* b)
 
 
 //1B 12 00 01 ?? 00 78 4F 00 00 00 79 01 7A 00 strlen
+//to figure out.
 byte* is_name_text(byte* b, dword &length)
 {
 	length = 0;
@@ -134,8 +137,9 @@ byte* is_name_text(byte* b, dword &length)
 	}
 	return 0;
 }
-
+//1B 12 00 01 ?? 00 78 4F 00 00 00 79 01 7A 00
 //1B 12 00 01 ?? 00 78 70 00 00 00 79 01 7A 00 strlen
+//To figure out.
 byte* is_select_text(byte* b, dword &length)
 {
 	length = 0;
@@ -161,23 +165,32 @@ byte* is_select_text(byte* b, dword &length)
 	return 0;
 }
 
-//²»ÖªµÀÕâÊÇÊ²Ã´¡­¡­
+//Â²Â»Ã–ÂªÂµÃ€Ã•Ã¢ÃŠÃ‡ÃŠÂ²ÃƒÂ´Â¡Â­Â¡Â­
 //1E 00 00 00 00 ?? ?? 00 00
+//06 00 70 df 59 02 00 ff ff
+//?? 42 7b 02 52 ff 02 06 00 70 df 59 02 00 ff ff
+
+//This function grabs the Box text, find the hex-code that is before a string used inside a box, see example folder, file: box_text_example.png
 byte* is_box_text(byte* b,dword &length)
 {
 	
 	length = 0;
-	if( b[0] == 0x1E &&
+	if( 
 		b[1] == 0x00 &&
-		b[2] == 0x00 &&
-		b[3] == 0x00 &&
-		b[4] == 0x00 &&
-		b[7] == 0x00 &&
-		b[8] == 0x00)
+		b[2] == 0x70 &&
+		b[3] == 0xdf &&
+		b[4] == 0x59 &&
+		b[5] == 0x02 &&
+		b[6] == 0x00 &&
+		b[7] == 0xff &&
+		b[8] == 0xff
+		)
 	{
 		//printf("box text\n");
-
-		length = b[5];
+		//printf(" 0x%1x ", (unsigned)b[6]);
+		//printf("\n");
+		//length = b[4];
+		length = 0xff; //length isn't mentioned in the hex for this particular file (at least haven't found it yet)
 		return &b[9];
 	}
 
@@ -194,7 +207,7 @@ int main()
 	dword size;
 	dword read_tell;
 
-	static char print_chars[1024];
+	static char print_chars[9999];
 	byte* char_pointer;
 	dword char_length;
 
@@ -210,6 +223,7 @@ int main()
 	{
 		fseek(f,0,SEEK_END);
 		size = ftell(f);
+		//size = sizeof(byte);
 		fseek(f,0,SEEK_SET);
 
 
@@ -223,8 +237,9 @@ int main()
 		read_tell = 0;
 
 		dword line_num = 0;
-		for(read_tell = 0; read_tell < size;read_tell++)
+		for (read_tell = 0; read_tell < size; read_tell++)
 		{
+
 			char_pointer = text_point(&data[read_tell]);
 			if (char_pointer)
 			{
@@ -238,14 +253,14 @@ int main()
 					{
 						string dispstr = replace_all(print_chars, "\x1b\xf8\x01\xff", "\\n");
 						dispstr = replace_all(dispstr, "\n", "\\a");
-						fwprintf(txt, L"¡ð%08X¡ð%08d¡ñ\r\n%s\r\n\r\n", (char_pointer - data), line_num++, AnsiToUnicode(dispstr.c_str()));
+						fwprintf(txt, L"â—‹%08Xâ—‹%08dâ—\r\n%s\r\n\r\n", (char_pointer - data), line_num++, AnsiToUnicode(dispstr.c_str()));
 
 						mydic.insert(DwordMap::value_type((char_pointer - data), 0));
 					}
 
 				}
 
-				//fprintf(txt, "%s\r\n", print_chars);
+				fprintf(txt, "%s\r\n", print_chars);
 			}
 
 			char_pointer = is_name_text(&data[read_tell], char_length);
@@ -255,20 +270,22 @@ int main()
 				print_chars[char_length] = 0;
 				if (mydic.find((char_pointer - data)) == mydic.end())
 				{
-					fwprintf(txt, L"¡ð%08X¡ð%08d¡ñ\r\n%s\r\n\r\n", (char_pointer - data), line_num++, AnsiToUnicode(print_chars));
+					fwprintf(txt, L"â—‹%08Xâ—‹%08dâ—\r\n%s\r\n\r\n", (char_pointer - data), line_num++, AnsiToUnicode(print_chars));
 
 					mydic.insert(DwordMap::value_type((char_pointer - data), 0));
 				}
 			}
 
 			char_pointer = is_select_text(&data[read_tell], char_length);
+
 			if (char_pointer && char_length)
 			{
+
 				memcpy(print_chars, char_pointer, char_length);
 				print_chars[char_length] = 0;
 				if (mydic.find((char_pointer - data)) == mydic.end())
 				{
-					fwprintf(txt, L"¡ð%08X¡ð%08d¡ñ\r\n%s\r\n\r\n", (char_pointer - data), line_num++, AnsiToUnicode(print_chars));
+					fwprintf(txt, L"â—‹%08Xâ—‹%08dâ—\r\n%s\r\n\r\n", (char_pointer - data), line_num++, AnsiToUnicode(print_chars));
 
 					mydic.insert(DwordMap::value_type((char_pointer - data), 0));
 				}
@@ -278,11 +295,11 @@ int main()
 			if (char_pointer && char_length)
 			{
 				memcpy(print_chars, char_pointer, char_length);
+
 				print_chars[char_length] = 0;
 				if (mydic.find((char_pointer - data)) == mydic.end())
 				{
-					fwprintf(txt, L"¡ð%08X¡ð%08d¡ñ\r\n%s\r\n\r\n", (char_pointer - data), line_num++, AnsiToUnicode(print_chars));
-
+					fwprintf(txt, L"â—‹%08Xâ—‹%08dâ—\r\n%s\r\n\r\n", (char_pointer - data), line_num++, AnsiToUnicode(print_chars));
 					mydic.insert(DwordMap::value_type((char_pointer - data), 0));
 				}
 			}
