@@ -112,7 +112,7 @@ byte* text_point(byte* b)
 
 
 //1B 12 00 01 ?? 00 78 4F 00 00 00 79 01 7A 00 strlen
-//to figure out.
+//This was easier than I thought it'd be, seems the hex string for this is similar in most games, just had to replace b[7], same as always find a name, and get the hex string needed.
 byte* is_name_text(byte* b, dword &length)
 {
 	length = 0;
@@ -123,7 +123,7 @@ byte* is_name_text(byte* b, dword &length)
 
 		b[5] == 0x00 &&
 		b[6] == 0x78 &&
-		b[7] == 0x4F &&
+		b[7] == 0x16 &&//Only this line changed.
 		b[8] == 0x00 &&
 		b[9] == 0x00 &&
 		b[10] == 0x00 &&
@@ -139,7 +139,9 @@ byte* is_name_text(byte* b, dword &length)
 }
 //1B 12 00 01 ?? 00 78 4F 00 00 00 79 01 7A 00
 //1B 12 00 01 ?? 00 78 70 00 00 00 79 01 7A 00 strlen
-//To figure out.
+//1B 12 00 01 25 00 78 16 00 00 00 79 01 7a 00 
+//1B 12 00 01 2d 00 78 16 00 00 00 79 01 7a 00
+//Seems to be the same for most games, see the b[7] line for more info.
 byte* is_select_text(byte* b, dword &length)
 {
 	length = 0;
@@ -150,7 +152,7 @@ byte* is_select_text(byte* b, dword &length)
 
 		b[5] == 0x00 &&
 		b[6] == 0x78 &&
-		b[7] == 0x70 &&
+		b[7] == 0x16 && //go figure, only had to replace this line? as with the is_box_text function, find this number before the string hex-code
 		b[8] == 0x00 &&
 		b[9] == 0x00 &&
 		b[10] == 0x00 &&
@@ -169,6 +171,7 @@ byte* is_select_text(byte* b, dword &length)
 //1E 00 00 00 00 ?? ?? 00 00
 //06 00 70 df 59 02 00 ff ff
 //?? 42 7b 02 52 ff 02 06 00 70 df 59 02 00 ff ff
+//1B 60 00 ff 1B 1a 02 ff 1b 03 00 01 06 00 70 55 10 02 00 ff ff 
 
 //This function grabs the Box text, find the hex-code that is before a string used inside a box, see example folder, file: box_text_example.png
 byte* is_box_text(byte* b,dword &length)
@@ -191,7 +194,7 @@ byte* is_box_text(byte* b,dword &length)
 		//printf("\n");
 		//length = b[4];
 		length = 0xff; //length isn't mentioned in the hex for this particular file (at least haven't found it yet)
-		return &b[9];
+		return &b[10];
 	}
 
 	return 0;
