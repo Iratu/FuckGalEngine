@@ -2,10 +2,11 @@
 #include <stdio.h>
 #include <string>
 #include <unordered_map>
-
+#include <sstream>
+#include <iostream>
+#include <iomanip>
 
 using namespace std;
-
 
 typedef  unsigned char byte;
 typedef  unsigned long dword;
@@ -20,6 +21,8 @@ wchar_t *AnsiToUnicode(const char *str)
 	result[len] = L'\0';
 	return result;
 }
+
+
 
 //È«²¿Ìæ»»
 string replace_all(string dststr, string oldstr, string newstr)
@@ -69,8 +72,10 @@ dword vm_strlen(byte* b)
 	}
 	return c - b;
 }
+
 /*
-byte cmp_byte[]={0x1B,0x12,0x00,0x01,0x06,0x00,0x20,0x50,0x00,0x00,0x00,0xFF,0x02,0x06,0x00,0x19,0x60,0xA5,0x00,0x00,0xFF,0xFF};
+//1b 12 00 01 06 00 20 1d 00 00 00 ff 02 06 00 70 da 5e 02 00 ff ff
+byte cmp_byte[]={0x1B,0x12,0x00,0x01,0x06,0x00,0x20,0x1d,0x00,0x00,0x00,0xFF,0x02,0x06,0x00,0x70,0xda,0x5e,0x02,0x00,0xFF,0xFF};
 byte* text_point(byte* b)
 {
 	if(memcmp(b,cmp_byte,sizeof(cmp_byte))==0)
@@ -84,9 +89,8 @@ byte* text_point(byte* b)
 
 byte start_byte[] = { 0x1B, 0x12, 0x00, 0x01};
 byte end_byte[] = {0x00, 0x00, 0xff, 0xFF};
-byte tag[] = {0x1B, 0x60, 0x00, 0xFF};
+byte tag[] = {0x1B, 0x03, 0x00, 0x01};
 //byte tag[] = { 0x00, 0x7a, 0x00, 0x04 };
-//To figure out, I have some sort of a clue how to work this but not certain about it yet.
 byte* text_point(byte* b)
 {
 	byte *pos = b;
@@ -177,7 +181,6 @@ byte* is_select_text(byte* b, dword &length)
 byte* is_box_text(byte* b,dword &length)
 {
 
-	byte endtag[] = { 0x1B, 0x12, 0x00, 0x01 };
 	length = 0;
 	if( 
 		b[1] == 0x00 &&
@@ -190,13 +193,18 @@ byte* is_box_text(byte* b,dword &length)
 		b[8] == 0xff
 		)
 	{
-		//printf("box text\n");
-		//printf(" 0x%1x ", (unsigned)b[6]);
-		//printf("\n");
-		//length = b[4];
-		//end hex
 		//1b 12 00 01 06 00 20 1d
-		length = 0xff; //length isn't mentioned in the hex for this particular file (at least haven't found it yet)
+		size_t i = 8;
+		while( i < 500) {
+			i++;
+			if (b[i] == 0x1B && (b[i + 1]) == 0x12 && (b[i + 2]) == 0x00)
+			{
+				//i = 0xff;
+				//length - 8;
+				break;
+			}
+			length++;
+		}
 		return &b[9];
 	}
 
@@ -245,7 +253,7 @@ int main()
 		dword line_num = 0;
 		for (read_tell = 0; read_tell < size; read_tell++)
 		{
-			/*
+			
 			char_pointer = text_point(&data[read_tell]);
 			if (char_pointer)
 			{
@@ -258,7 +266,7 @@ int main()
 					fixstr(print_chars, char_length);
 					if (mydic.find((char_pointer - data)) == mydic.end())
 					{
-						string dispstr = replace_all(print_chars, "\x1b\xf8\x01\xff", "\\n");
+						string dispstr = replace_all(print_chars, "\x1b\x60\x00\xff", "\\n");
 						dispstr = replace_all(dispstr, "\n", "\\a");
 						fwprintf(txt, L"○%08X○%08d●\r\n%s\r\n\r\n", (char_pointer - data), line_num++, AnsiToUnicode(dispstr.c_str()));
 
@@ -267,9 +275,9 @@ int main()
 
 				}
 
-				fprintf(txt, "%s\r\n", print_chars);
+				//fprintf(txt, "%s\r\n", print_chars);
 			}
-			*/
+			
 			char_pointer = is_name_text(&data[read_tell], char_length);
 			if (char_pointer && char_length)
 			{
@@ -277,7 +285,12 @@ int main()
 				print_chars[char_length] = 0;
 				if (mydic.find((char_pointer - data)) == mydic.end())
 				{
-					fwprintf(txt, L"○%08X○%08d●\r\n%s\r\n\r\n", (char_pointer - data), line_num++, AnsiToUnicode(print_chars));
+					fwprintf(txt, L"○%08X○%08d●\r\n%s\r\n\r\n[", (char_pointer - data), line_num++, AnsiToUnicode(print_chars));
+					for (size_t i = 0; i < char_length; i++)
+					{
+						fwprintf(txt, L"%02X ", char_pointer[i]);
+					}
+					fwprintf(txt, L"]\r\n\r\n");
 
 					mydic.insert(DwordMap::value_type((char_pointer - data), 0));
 				}
@@ -292,7 +305,12 @@ int main()
 				print_chars[char_length] = 0;
 				if (mydic.find((char_pointer - data)) == mydic.end())
 				{
-					fwprintf(txt, L"○%08X○%08d●\r\n%s\r\n\r\n", (char_pointer - data), line_num++, AnsiToUnicode(print_chars));
+					fwprintf(txt, L"○%08X○%08d●\r\n%s\r\n\r\n[", (char_pointer - data), line_num++, AnsiToUnicode(print_chars));
+					for (size_t i = 0; i < char_length; i++)
+					{
+						fwprintf(txt, L"%02X ", char_pointer[i]);
+					}
+					fwprintf(txt, L"]\r\n\r\n");
 
 					mydic.insert(DwordMap::value_type((char_pointer - data), 0));
 				}
@@ -306,7 +324,12 @@ int main()
 				print_chars[char_length] = 0;
 				if (mydic.find((char_pointer - data)) == mydic.end())
 				{
-					fwprintf(txt, L"○%08X○%08d●\r\n%s\r\n\r\n", (char_pointer - data), line_num++, AnsiToUnicode(print_chars));
+					fwprintf(txt, L"○%08X○%08d●\r\n%s\r\n\r\n[ ", (char_pointer - data), line_num++, AnsiToUnicode(print_chars));
+					for (size_t i = 0; i < char_length; i++)
+					{
+						fwprintf(txt, L"%02X ", char_pointer[i]);
+					}
+					fwprintf(txt, L"]\r\n\r\n");
 					mydic.insert(DwordMap::value_type((char_pointer - data), 0));
 				}
 			}
