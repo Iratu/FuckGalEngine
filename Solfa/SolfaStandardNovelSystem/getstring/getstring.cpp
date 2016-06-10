@@ -87,13 +87,22 @@ byte* text_point(byte* b)
 */
 
 
-byte start_byte[] = { 0x1B, 0x12, 0x00, 0x01};
-byte end_byte[] = {0x00, 0x00, 0xff, 0xFF};
-byte tag[] = {0x1B, 0x03, 0x00, 0x01};
+byte start_byte[] = {0x1b, 0x39, 0x00, 0x00};
+byte end_byte[] = {0x00, 0x00, 0xff, 0xff};
+byte tag[] = {0x1B, 0x60, 0x00, 0xff};
 //byte tag[] = { 0x00, 0x7a, 0x00, 0x04 };
-byte* text_point(byte* b)
+//1B 60 00 ff 1B 1a 02 ff 1b 03 00 01 06 00 70 55 10 02 00 ff ff 
+//1b 1a 02 ff
+byte* text_point(byte* b)//Annoying piece of **** Can't get it to do what I need it to do.
 {
 	byte *pos = b;
+
+	if (b[1] == 0x02 && (b[2]) == 0x00 && (b[3]) == 0xff && (b[4]) == 0xff)
+	{
+		return NULL;
+	}
+
+
 	if (!memcmp(b, start_byte, sizeof(start_byte)))
 	{
 
@@ -108,7 +117,7 @@ byte* text_point(byte* b)
 		{
 			return end + sizeof(tag);
 		}
-		if (*end != 0x1B)
+		if (*end != 0x1b)
 			return end;
 	}
 	return NULL;
@@ -199,8 +208,6 @@ byte* is_box_text(byte* b,dword &length)
 			i++;
 			if (b[i] == 0x1B && (b[i + 1]) == 0x12 && (b[i + 2]) == 0x00)
 			{
-				//i = 0xff;
-				//length - 8;
 				break;
 			}
 			length++;
@@ -253,7 +260,7 @@ int main()
 		dword line_num = 0;
 		for (read_tell = 0; read_tell < size; read_tell++)
 		{
-			
+			/*
 			char_pointer = text_point(&data[read_tell]);
 			if (char_pointer)
 			{
@@ -268,7 +275,7 @@ int main()
 					{
 						string dispstr = replace_all(print_chars, "\x1b\x60\x00\xff", "\\n");
 						dispstr = replace_all(dispstr, "\n", "\\a");
-						fwprintf(txt, L"○%08X○%08d●\r\n%s\r\n\r\n", (char_pointer - data), line_num++, AnsiToUnicode(dispstr.c_str()));
+						fwprintf(txt, L"○%08X○%08d●\r\nNEW -- %s\r\n\r\n", (char_pointer - data), line_num++, AnsiToUnicode(dispstr.c_str()));
 
 						mydic.insert(DwordMap::value_type((char_pointer - data), 0));
 					}
@@ -277,7 +284,7 @@ int main()
 
 				//fprintf(txt, "%s\r\n", print_chars);
 			}
-			
+			*/
 			char_pointer = is_name_text(&data[read_tell], char_length);
 			if (char_pointer && char_length)
 			{
