@@ -15,60 +15,36 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="targetver.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="detours.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="detver.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="scriptparser.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="tools.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="translate.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="types.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="zlib.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="png.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="pngconf.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="pnglibconf.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="zconf.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="zlib.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="MinoriPatch.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="scriptparser.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="tools.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="translate.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Library Include="detours.lib">
+    <Library Include="libau.lib">
+      <Filter>资源文件</Filter>
+    </Library>
+    <Library Include="libpng16.lib">
       <Filter>资源文件</Filter>
     </Library>
     <Library Include="zlib.lib">
       <Filter>资源文件</Filter>
     </Library>
-    <Library Include="libpng.lib">
-      <Filter>资源文件</Filter>
-    </Library>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="akbtool.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
